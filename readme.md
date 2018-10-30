@@ -3,12 +3,12 @@ Just a collection of useful python scripts to make your tex life easier
 
 ## table.py
 Automatically generates tex tables from your acquired data.
-<p> IMPORTANT: You have to use the package sinunitx in your .tex file if you want to import the
+<p> IMPORTANT: You have to use the package siunitx in your .tex file if you want to import the
            generated file into your main document</p>
 Usage:
 <pre> <code>
 x, y = np.genfromtxt('data.txt') # If using numpy. TexTable also accepts generic lists
-table = TexTable([x, y], ['Y / V', 'X / Ampere'], label='table:mytable', caption='Description')
+table = TexTable([x, y], [r'Y / \si{\second}', r'My Y data'], label='table:mytable', caption='Description')
 table.writeFile('myTable.tex')
 </code></pre>
 
