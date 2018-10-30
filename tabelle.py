@@ -1,3 +1,6 @@
+from collections import defaultdict
+
+
 class TexTable:
     # data and names are arrays with the same dimensions
     def __init__(self, data, names, label='', caption='', roundPrecision=2):
@@ -6,6 +9,7 @@ class TexTable:
         self.label = label
         self.caption = caption
         self.roundPrecision = roundPrecision
+        self.rowOptions = defaultdict(list)
 
     def genOptions(self):
         return '\n'.join([f'\\caption{{{self.caption}}}',
@@ -16,7 +20,12 @@ class TexTable:
                            r', round-integer-to-decimal=true}')]) + '\n'
 
     def genLayout(self):
-        return '{' + 'S ' * len(self.names) + '}\n'
+        a = '{'
+        for i in range(len(self.names)):
+            a += 'S['
+            a += ','.join(self.rowOptions[i])
+            a += ']'
+        return a + '} \n'
 
     def genToprule(self):
         return ('\\toprule\n' +
@@ -27,6 +36,14 @@ class TexTable:
         for i in range(len(self.data[0])):
             a += ' & '.join([str(e[i]) for e in self.data]) + r'\\' + '\n'
         return a
+
+    # Used to add options in [] within the toprule
+    # row: The row for which the optio is specified
+    # option: A string that is inserted into the rows [] in the toprule
+    # statement
+    def addRowOption(self, row, option):
+        self.rowOptions[row].append(option)
+        return
 
     def genBotrule(self):
         return '\\bottomrule\n'
@@ -42,6 +59,7 @@ class TexTable:
 
 
 a = TexTable([[0, 2, 3], [4, 5, 6]], ['eins', 'zwei'])
+a.addRowOption(0, ' ')
 a.writeFile('test.tex')
 print(len(a.data))
 print(a.genTex())
