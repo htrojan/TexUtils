@@ -7,7 +7,7 @@ Automatically generates tex tables from your acquired data.
            generated file into your main document</p>
 Usage:
 <pre> <code>
-x, y = np.genfromtxt('data.txt')
+x, y = np.genfromtxt('data.txt') # If using numpy. TexTable also accepts generic lists
 table = TexTable([x, y], ['Y / V', 'X / Ampere'], label='table:mytable', caption='Description')
 table.writeFile('myTable.tex')
 </code></pre>
