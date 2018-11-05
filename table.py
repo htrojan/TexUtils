@@ -10,14 +10,18 @@ class TexTable:
         self.caption = caption
         self.roundPrecision = roundPrecision
         self.rowOptions = defaultdict(list)
+        self.rowFormats = {} # Empty dict for format strings
+
+    def genFormatString(self, roundingPrecision):
+        return r'{:.' + str(roundingPrecision) + 'f' +'}'
+
+    def defaultFormat(self):
+        return self.genFormatString(self.roundPrecision)
 
     def genOptions(self):
         return '\n'.join([f'\\caption{{{self.caption}}}',
                          f'\\label{{{self.label}}}',
-                          r'\centering',
-                          (r'\sisetup{round-mode = places, round-precision='
-                           + str(self.roundPrecision) +
-                           r', round-integer-to-decimal=true}')]) + '\n'
+                          r'\centering']) + '\n'
 
     def genLayout(self):
         a = '{'
@@ -33,8 +37,16 @@ class TexTable:
 
     def genMidrule(self):
         a = '\\midrule\n'
-        for i in range(len(self.data[0])):
-            a += ' & '.join([str(e[i]) for e in self.data]) + r'\\' + '\n'
+        # v is the vertical index, h is the horizontal index
+        for v in range(len(self.data[0])):
+            column = []
+            for (h, e) in enumerate(self.data):
+                if(h in self.rowFormats):
+                    num = self.rowFormats[h].format(e[v])
+                else:
+                    num = self.defaultFormat().format(e[v])
+                column.append(num)
+            a += ' & '.join(column) + r'\\' + '\n'
         return a
 
     # Used to add options in [] within the toprule
@@ -46,7 +58,8 @@ class TexTable:
         return
 
     def setRowRounding(self, row, precision):
-        self.addRowOption(row, f'round-precision={precision}')
+        self.rowFormats[row] = self.genFormatString(precision)
+        return
 
     def genBotrule(self):
         return '\\bottomrule\n'
