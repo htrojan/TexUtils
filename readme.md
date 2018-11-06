@@ -32,3 +32,14 @@ The TexTable takes two necessary arguments:
 - label - The label of the table
 - caption - The Caption of the table
 - roundPrecision - How many places should be rounded (default 2)
+
+## error.py
+Generates your error formulas for gaussian error propagation in latex code and calculates your numerical
+error values with the uncertainties package - all in one go.
+
+Usage:
+<pre><code>
+x_error = Error('x + b * c', ('x', ufloat(10, 0.1)), ('b', ufloat(5, 0.3)), ('c', ufloat(2, 0.25))
+print(x_error.getLatexError())
+print(x_error.getNumericalError())
+</code></pre>
