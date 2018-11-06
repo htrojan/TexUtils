@@ -35,10 +35,10 @@ The TexTable takes two necessary arguments:
 - caption - The Caption of the table
 - roundPrecision - How many places should be rounded (default 2)
 
-Set rounding options of individual rows:
-use 
-table.setRowRounding(rowIndex, precision)
-
+<p>Additional functions:</p>
+ 
+- table.setRowRounding(rowIndex, precision) # Set rounding options of individual rows
+- table.addRowOption('table-format=2.1') # Set row options which are inserted into the tex code
 
 
 ## error.py
