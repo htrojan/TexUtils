@@ -5,10 +5,12 @@ Just a collection of useful python scripts to make your tex life easier
 Automatically generates tex tables from your acquired data.
 <p> IMPORTANT: You have to use the package siunitx in your .tex file if you want to import the
            generated file into your main document</p>
+           
 Usage:
 <pre> <code>
 x, y = np.genfromtxt('data.txt') # If using numpy. TexTable also accepts generic lists
 table = TexTable([x, y], [r'Y / \si{\second}', r'My Y data'], label='table:mytable', caption='Description')
+table.setRowRounding(0, 1) # Row given at index 0 should be rounded after 1 places
 table.writeFile('myTable.tex')
 </code></pre>
 
@@ -32,6 +34,12 @@ The TexTable takes two necessary arguments:
 - label - The label of the table
 - caption - The Caption of the table
 - roundPrecision - How many places should be rounded (default 2)
+
+Set rounding options of individual rows:
+use 
+table.setRowRounding(rowIndex, precision)
+
+
 
 ## error.py
 Generates your error formulas for gaussian error propagation in latex code and calculates your numerical
