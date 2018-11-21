@@ -3,7 +3,8 @@ from collections import defaultdict
 
 class TexTable:
     # data and names are arrays with the same dimensions
-    def __init__(self, data, names, label='', caption='', roundPrecision=2):
+    def __init__(self, data, names, label='', caption='', roundPrecision=2,
+                 defaultFormat=''):
         self.data = data
         self.names = names
         self.label = label
@@ -11,12 +12,16 @@ class TexTable:
         self.roundPrecision = roundPrecision
         self.rowOptions = defaultdict(list)
         self.rowFormats = {} # Empty dict for format strings
+        self.defaultFormat = defaultFormat
 
     def genFormatString(self, roundingPrecision):
         return r'{:.' + str(roundingPrecision) + 'f' +'}'
 
-    def defaultFormat(self):
-        return self.genFormatString(self.roundPrecision)
+    def getDefaultFormat(self):
+        if(self.defaultFormat == ''):
+            return self.genFormatString(self.roundPrecision)
+        else:
+            return self.defaultFormat
 
     def genOptions(self):
         return '\n'.join([f'\\caption{{{self.caption}}}',
@@ -44,7 +49,7 @@ class TexTable:
                 if(h in self.rowFormats):
                     num = self.rowFormats[h].format(e[v])
                 else:
-                    num = self.defaultFormat().format(e[v])
+                    num = self.getDefaultFormat().format(e[v])
                 column.append(num)
             a += ' & '.join(column) + r'\\' + '\n'
         return a
@@ -65,10 +70,46 @@ class TexTable:
         return '\\bottomrule\n'
 
     def genTex(self):
-        return ''.join([r"\begin{table}", self.genOptions(), r"\begin{tabular}",
-                        self.genLayout(), self.genToprule(), self.genMidrule(),
-                        self.genBotrule(), r"\end{tabular}", r"\end{table}"])
+        return ''.join([r"\begin{table}", self.genOptions(),
+                        self.genInnerTex(),
+                        r"\end{table}"])
+
+    def genInnerTex(self):
+        return ''.join([r"\begin{tabular}", self.genLayout(), self.genToprule(),
+                        self.genMidrule(),
+                        self.genBotrule(), r"\end{tabular}"])
 
     def writeFile(self, loc):
         with open(loc, 'w+') as f:
             f.write(self.genTex())
+
+
+class Combined:
+    def __init__(self, tables, subOptions = r'.5\linewidth', caption=''):
+        self.tables = tables
+        self.subOptions = subOptions
+        self.caption = caption
+        return
+
+    def genSubTable(self, table):
+        return ''.join([r"\begin{subtable}",
+                        f"{{{self.subOptions}}}",
+                        table.genOptions(), table.genInnerTex(),
+                        r"\end{subtable}"])
+
+    def genSubTableArray(self):
+        tables = '\n'.join([self.genSubTable(t) for t in self.tables])
+        return tables
+
+    def genTex(self):
+        return ' '.join([r'\begin{table}', f"\\caption{{{self.caption}}}",
+                         self.genSubTableArray(), r'\end{table}'])
+
+    def writeFile(self, loc):
+        with open(loc, 'w+') as f:
+            f.write(self.genTex())
+
+    def writeInnerTables(self, loc):
+        with open(loc, 'w+') as f:
+            f.write(self.genSubTableArray())
+
