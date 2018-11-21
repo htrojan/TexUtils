@@ -40,6 +40,15 @@ The TexTable takes two necessary arguments:
 - table.setRowRounding(rowIndex, precision) # Set rounding options of individual rows
 - table.addRowOption('table-format=2.1') # Set row options which are inserted into the tex code
 
+### Combining tables into a subtable
+<pre> <code>
+from texutils.table import Combine
+
+t1 = TexTable([a, b])
+t2 = TexTable([c, d])
+
+Combine(t1, t2).writeFile('myCombinedTable.tex')
+</code> </pre>
 
 ## error.py
 Generates your error formulas for gaussian error propagation in latex code and calculates your numerical
