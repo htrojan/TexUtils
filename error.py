@@ -6,7 +6,7 @@ class Error:
     # As tuples ('a', ufloat(1, 0.1))
     def __init__(self, fun, *numbers):
         self.f = sympy.sympify(fun)
-        print(self.f)
+        print(f'f := {self.f}')
         self.numbers = numbers
         return
 

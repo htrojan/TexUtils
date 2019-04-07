@@ -50,7 +50,7 @@ class TexTable:
                     num = self.rowFormats[h].format(e[v])
                 else:
                     num = self.getDefaultFormat().format(e[v])
-                column.append(num)
+                column.append(num.replace('+/-', '+-'))
             a += ' & '.join(column) + r'\\' + '\n'
         return a
 
@@ -64,6 +64,10 @@ class TexTable:
 
     def setRowRounding(self, row, precision):
         self.rowFormats[row] = self.genFormatString(precision)
+        return
+
+    def setCustomFormat(self, row, format):
+        self.rowFormats[row] = format
         return
 
     def genBotrule(self):
