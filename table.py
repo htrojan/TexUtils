@@ -14,21 +14,21 @@ class TexTable:
         self.rowFormats = {} # Empty dict for format strings
         self.defaultFormat = defaultFormat
 
-    def genFormatString(self, roundingPrecision):
+    def gen_formatstring(self, roundingPrecision):
         return r'{:.' + str(roundingPrecision) + 'f' +'}'
 
-    def getDefaultFormat(self):
+    def get_defaultformat(self):
         if(self.defaultFormat == ''):
-            return self.genFormatString(self.roundPrecision)
+            return self.gen_formatstring(self.roundPrecision)
         else:
             return self.defaultFormat
 
-    def genOptions(self):
+    def gen_options(self):
         return '\n'.join([f'\\caption{{{self.caption}}}',
                          f'\\label{{{self.label}}}',
                           r'\centering']) + '\n'
 
-    def genLayout(self):
+    def gen_layout(self):
         a = '{'
         for i in range(len(self.names)):
             a += 'S['
@@ -36,11 +36,11 @@ class TexTable:
             a += ']'
         return a + '} \n'
 
-    def genToprule(self):
+    def gen_toprule(self):
         return ('\\toprule\n' +
                 ' & '.join(['{' + x + '}' for x in self.names]) + r'\\' + '\n')
 
-    def genMidrule(self):
+    def gen_midrule(self):
         a = '\\midrule\n'
         # v is the vertical index, h is the horizontal index
         for v in range(len(self.data[0])):
@@ -49,7 +49,7 @@ class TexTable:
                 if(h in self.rowFormats):
                     num = self.rowFormats[h].format(e[v])
                 else:
-                    num = self.getDefaultFormat().format(e[v])
+                    num = self.get_defaultformat().format(e[v])
                 column.append(num.replace('+/-', '+-'))
             a += ' & '.join(column) + r'\\' + '\n'
         return a
@@ -58,62 +58,68 @@ class TexTable:
     # row: The row for which the optio is specified
     # option: A string that is inserted into the rows [] in the toprule
     # statement
-    def addRowOption(self, row, option):
+    def add_row_option(self, row, option):
         self.rowOptions[row].append(option)
         return
 
-    def setRowRounding(self, row, precision):
-        self.rowFormats[row] = self.genFormatString(precision)
+    def set_row_rounding(self, row, precision):
+        self.set_custom_format(row, self.gen_formatstring(precision))
         return
 
-    def setCustomFormat(self, row, format):
+    def set_custom_format(self, row, format):
         self.rowFormats[row] = format
         return
 
-    def genBotrule(self):
+    def gen_botrule(self):
         return '\\bottomrule\n'
 
-    def genTex(self):
-        return ''.join([r"\begin{table}", self.genOptions(),
-                        self.genInnerTex(),
+    def gen_tex(self):
+        return ''.join([r"\begin{table}", self.gen_options(),
+                        self.gen_inner_tex(),
                         r"\end{table}"])
 
-    def genInnerTex(self):
-        return ''.join([r"\begin{tabular}", self.genLayout(), self.genToprule(),
-                        self.genMidrule(),
-                        self.genBotrule(), r"\end{tabular}"])
+    def gen_inner_tex(self):
+        return ''.join([r"\begin{tabular}", self.gen_layout(), self.gen_toprule(),
+                        self.gen_midrule(),
+                        self.gen_botrule(), r"\end{tabular}"])
 
-    def writeFile(self, loc):
+    def write_file(self, loc):
         with open(loc, 'w+') as f:
-            f.write(self.genTex())
+            f.write(self.gen_tex())
 
 
 class Combined:
-    def __init__(self, tables, subOptions = r'.5\linewidth', caption=''):
+    # multirow specifies how many tables are made per row
+    def __init__(self, tables, multirow = 2, caption='', label=''):
         self.tables = tables
-        self.subOptions = subOptions
+        # As latex has problems with precise fractions, a small amount is subtracted
+        self.subOptions = f'{(1 / multirow - 0.1 / multirow):0.2f}\\linewidth'
         self.caption = caption
+        self.label = label
         return
 
-    def genSubTable(self, table):
-        return ''.join([r"\begin{subtable}",
+    def gen_subtable(self, table):
+        return ''.join([r"\begin{subtable}[t]",
                         f"{{{self.subOptions}}}",
-                        table.genOptions(), table.genInnerTex(),
+                        table.gen_options(), table.gen_inner_tex(),
                         r"\end{subtable}"])
 
-    def genSubTableArray(self):
-        tables = '\n'.join([self.genSubTable(t) for t in self.tables])
+    def gen_subtable_array(self):
+        tables = '\n'.join([self.gen_subtable(t) for t in self.tables])
         return tables
 
-    def genTex(self):
-        return ' '.join([r'\begin{table}', f"\\caption{{{self.caption}}}",
-                         self.genSubTableArray(), r'\end{table}'])
+    def gen_tex(self):
+        return ' '.join([r'\begin{table}', 
+                         self.gen_subtable_array(), 
+                         f"\\caption{{{self.caption}}}",
+                         f"\\label{{{self.label}}}",
+                         r'\end{table}'])
 
-    def writeFile(self, loc):
+    def write_file(self, loc):
         with open(loc, 'w+') as f:
-            f.write(self.genTex())
+            f.write(self.gen_tex())
 
-    def writeInnerTables(self, loc):
+    def write_inner_tables(self, loc):
         with open(loc, 'w+') as f:
-            f.write(self.genSubTableArray())
+            f.write(self.gen_subtable_array())
 

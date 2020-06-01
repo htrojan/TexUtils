@@ -1,0 +1,5 @@
+backend : pgf
+font.family : serif
+text.usetex : True
+pgf.rcfonts : False
+pgf.texsystem : pdflatex

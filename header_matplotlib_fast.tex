@@ -1,0 +1,43 @@
+%%%%%%%%
+% Thanks to The-Ludwig
+%%%%%%%%
+
+
+% unverzichtbare Mathe-Befehle
+\usepackage{amsmath}
+% viele Mathe-Symbole
+\usepackage{amssymb}
+
+% Zahlen und Einheiten
+\usepackage[
+  locale=DE,                 % deutsche Einstellungen
+  separate-uncertainty=true, % immer Fehler mit \pm
+  per-mode=reciprocal,       % ^-1 für inverse Einheiten
+%  output-decimal-marker=,,   % . statt , für Dezimalzahlen
+]{siunitx}
+\usepackage{physics}
+
+% "Simulate" some unicode-math features (Which are not available in the 
+% faster pdflatex-engine).
+
+\newcommand{\symup}[1]
+{
+  \mathrm{#1}
+}
+
+%% Macros
+
+\let\ltext\l
+\renewcommand{\l}
+{
+    \TextOrMath{ \ltext }{ \left }
+}
+\let\raccent\raccent
+\renewcommand{\r}
+{
+    \TextOrMath{ \raccent }{ \right }
+}
+\newcommand{\dif}[1]
+{
+    \mathinner{\mathrm{d} #1}
+}

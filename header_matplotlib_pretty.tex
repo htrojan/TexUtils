@@ -1,0 +1,30 @@
+% Wichtige Mathe-Pakete
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{fontspec}
+\usepackage[
+math-style=ISO,
+bold-style=ISO,
+sans-style=italic,
+nabla=upright,
+partial=upright
+]{unicode-math}
+
+% traditionelle Fonts für Mathematik
+\setmathfont{Latin Modern Math}
+\setmathfont{XITS Math}[range={scr, bfscr}]
+\setmathfont{XITS Math}[range={cal, bfcal}, StylisticSet=1]
+
+\usepackage{xfrac}
+% Zahlen und Einheiten
+\usepackage[
+  locale=DE,                 % deutsche Einstellungen
+  separate-uncertainty=true, % immer Fehler mit \pm
+  per-mode=symbol-or-fraction,       % ^-1 für inverse Einheiten
+  output-decimal-marker=.,   % . statt , für Dezimalzahlen
+]{siunitx}
+\setmathfont{Latin Modern Math}
+
+\usepackage{microtype}
+\usepackage{physics}

@@ -1,0 +1,7 @@
+backend : pgf
+font.family : serif
+font.size : 11
+legend.fontsize : medium
+text.usetex : True
+pgf.texsystem : lualatex
+pgf.rcfonts : False
