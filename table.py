@@ -1,11 +1,15 @@
 from collections import defaultdict
+import numpy as np
 
 
 class TexTable:
     # data and names are arrays with the same dimensions
-    def __init__(self, data, names, label='', caption='', roundPrecision=2,
-                 defaultFormat=''):
+    # If index is specified as a string, an index row is added with the given name ranging from 1 to
+    # the last data point
+    def __init__(self, data=[], names=[], label='', caption='', roundPrecision=2,
+                 defaultFormat='', index=None):
         self.data = data
+        self.index = index
         self.names = names
         self.label = label
         self.caption = caption
@@ -13,6 +17,23 @@ class TexTable:
         self.rowOptions = defaultdict(list)
         self.rowFormats = {} # Empty dict for format strings
         self.defaultFormat = defaultFormat
+        self.customLayout = {} # Custom layout instead of sinunitx S
+
+        #Check for different data input
+        for i, d in enumerate(data):
+            if isinstance(d[0], str):
+                self.set_custom_format(i, r'{}')
+                self.customLayout[i] = 'c'
+
+    def add_row(self, data, name):
+        self.data.append(data)
+        self.names.append(name)
+        if(isinstance(data[0], str)):
+            self.set_custom_format(len(self.data)-1, r'{}')
+            self.customLayout[len(self.data)-1, 'c']
+
+    def setindex(self, name):
+        self.index = name
 
     def gen_formatstring(self, roundingPrecision):
         return r'{:.' + str(roundingPrecision) + 'f' +'}'
@@ -30,21 +51,37 @@ class TexTable:
 
     def gen_layout(self):
         a = '{'
+        if self.index is not None:
+            a += 'c'
         for i in range(len(self.names)):
-            a += 'S['
-            a += ','.join(self.rowOptions[i])
-            a += ']'
+            if i in self.customLayout:
+                # print(f'Custom layout: {i}')
+                a += self.customLayout[i]
+            else:
+                # print(self.rowOptions)
+                # print(i)
+                a += 'S['
+                a += ','.join(self.rowOptions[i])
+                a += ']'
         return a + '} \n'
 
     def gen_toprule(self):
+        s = ''
+        if self.index is not None:
+            s += self.index + ' & '
         return ('\\toprule\n' +
-                ' & '.join(['{' + x + '}' for x in self.names]) + r'\\' + '\n')
+                 s + ' & '.join(['{' + x + '}' for x in self.names]) + r'\\' + '\n')
 
     def gen_midrule(self):
         a = '\\midrule\n'
+        if self.index is not None:
+            index = np.arange(1, len(self.data[0])+1)
         # v is the vertical index, h is the horizontal index
+        # print('Laenge:' + str(len(self.data[0])))
         for v in range(len(self.data[0])):
             column = []
+            if self.index is not None:
+                column.append(str(index[v]))
             for (h, e) in enumerate(self.data):
                 if(h in self.rowFormats):
                     num = self.rowFormats[h].format(e[v])
@@ -69,6 +106,12 @@ class TexTable:
     def set_custom_format(self, row, format):
         self.rowFormats[row] = format
         return
+
+    def set_caption(self, caption):
+        self.caption = caption
+
+    def set_label(self, label):
+        self.label = label
 
     def gen_botrule(self):
         return '\\bottomrule\n'
