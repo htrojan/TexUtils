@@ -15,10 +15,10 @@ def write_param_txt(params, cov_mat, names, filename):
 
 # Thanks @Alexey for the idea!
 # Warning: This method only works if pint is installed on your system!
-def write_texvalue(value, filename, scientific = False):
+def write_texvalue(value, filename, scientific = False, precision=None):
     value *= ureg.m / ureg.m
     with open(filename, 'w+') as f:
-        f.write(get_texstring(value, scientific))
+        f.write(get_texstring(value, scientific, precision))
 
 def write_texvalue_simple(value, filename, form=r'{:.0f}'):
     with open(filename, 'w+') as f:
@@ -27,10 +27,13 @@ def write_texvalue_simple(value, filename, form=r'{:.0f}'):
     .replace('electron_volt', 'electronvolt'))
                 
 
-def get_texstring(value, scientific = False):
+def get_texstring(value, scientific = False, precision=None):
     if(scientific):
         return ((f'{value:.eLx}').replace('+/-', '+-').replace('(', '')
         .replace(')', ''))
+    if(precision != None):
+        return f'{{:.{precision}fLx}}'.format(value).replace('+/-', '+-')
+
     return ((f'{value:.fLx}').replace('+/-', '+-')
     .replace('electron_volt', 'electronvolt'))
 

@@ -1,5 +1,7 @@
 from collections import defaultdict
 import numpy as np
+import uncertainties
+import numbers
 
 
 class TexTable:
@@ -7,9 +9,10 @@ class TexTable:
     # If index is specified as a string, an index row is added with the given name ranging from 1 to
     # the last data point
     def __init__(self, data=[], names=[], label='', caption='', roundPrecision=2,
-                 defaultFormat='', index=None):
+                 defaultFormat='', index=None, indexname=''):
         self.data = data
         self.index = index
+        self.indexname = indexname
         self.names = names
         self.label = label
         self.caption = caption
@@ -52,7 +55,7 @@ class TexTable:
     def gen_layout(self):
         a = '{'
         if self.index is not None:
-            a += 'c'
+            a += 's'
         for i in range(len(self.names)):
             if i in self.customLayout:
                 # print(f'Custom layout: {i}')
@@ -68,14 +71,14 @@ class TexTable:
     def gen_toprule(self):
         s = ''
         if self.index is not None:
-            s += self.index + ' & '
+            s +=  f'{self.indexname} & '
         return ('\\toprule\n' +
                  s + ' & '.join(['{' + x + '}' for x in self.names]) + r'\\' + '\n')
 
     def gen_midrule(self):
         a = '\\midrule\n'
         if self.index is not None:
-            index = np.arange(1, len(self.data[0])+1)
+            index = self.index
         # v is the vertical index, h is the horizontal index
         # print('Laenge:' + str(len(self.data[0])))
         for v in range(len(self.data[0])):
@@ -83,16 +86,25 @@ class TexTable:
             if self.index is not None:
                 column.append(str(index[v]))
             for (h, e) in enumerate(self.data):
+
                 if(h in self.rowFormats):
                     num = self.rowFormats[h].format(e[v])
                 else:
                     num = self.get_defaultformat().format(e[v])
+                # Sinunitx doesnt like 0.0 +- 0.0 as input. Remove +- 0.0  in this case
+                # This is done after formatting if some digits are cut of due to rounding
+                # print(e[v], type(e[v]))
+                if (isinstance(e[v], uncertainties.core.Variable) or isinstance(e[v], uncertainties.core.AffineScalarFunc)):
+                    # print("Uncertainties!")
+                    parsed = uncertainties.ufloat_fromstr(num)
+                    if (parsed.nominal_value == 0 and parsed.std_dev == 0):
+                        num = num[0:num.find('+/-')]
                 column.append(num.replace('+/-', '+-'))
             a += ' & '.join(column) + r'\\' + '\n'
         return a
 
     # Used to add options in [] within the toprule
-    # row: The row for which the optio is specified
+    # row: The row for which the option is specified
     # option: A string that is inserted into the rows [] in the toprule
     # statement
     def add_row_option(self, row, option):
